@@ -7,7 +7,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.9
+Release:	2.10
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -181,14 +181,16 @@ if [ "$1" = "0" ] || [ "$2" = "0" ]; then
 fi
 
 # config path changed, trigger it
-%triggerpostun cgi -- %{name}-cgi < 0.0.0.4-2.3
+%triggerpostun cgi -- %{name}-cgi < 0.0.0.4-2.10
 if [ -f /etc/httpd/mysqlstat.conf.rpmsave ]; then
 	cp -f %{_sysconfdir}/apache-%{name}.conf{,.rpmnew}
 	mv -f /etc/httpd/mysqlstat.conf.rpmsave %{_sysconfdir}/apache-%{name}.conf
 fi
 if [ -d %{_apache2dir}/httpd.conf ]; then
 	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache2dir}/httpd.conf/99_%{name}.conf
-	# no apache restart, as the config hasn't changed
+	if [ -f /var/lock/subsys/httpd ]; then
+		/etc/rc.d/init.d/httpd restart 1>&2
+	fi
 fi
 
 %files
