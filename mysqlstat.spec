@@ -37,8 +37,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define	_cgidir	/home/services/httpd/cgi-bin
 
 %description
-MYSQLSTAT - A set of utilities to monitor, store and display Mysql DBMS usage
-statistics.
+MYSQLSTAT - A set of utilities to monitor, store and display Mysql
+DBMS usage statistics.
 
 Types of stats: 
 1. Number of queries (queries/sec) 
