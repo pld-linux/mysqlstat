@@ -1,5 +1,5 @@
 --- Makefile.in~	2002-09-01 15:30:05.000000000 +0300
-+++ Makefile.in	2004-12-09 14:53:04.000000000 +0200
++++ Makefile.in	2004-12-09 14:55:49.000000000 +0200
 @@ -49,15 +49,15 @@
  	@echo Please read documentation before using MySQLStat
  
@@ -11,8 +11,9 @@
  
  install-bin:
 -	./install-sh -c -m 550 -o $(MYSQLSTAT_USER) -g root bin/collector $(BINDEST)/collector
+-	./install-sh -c -m 550 -o root -g root  bin/print_data $(BINDEST)/print_data
 +	./install-sh -c -m 550 bin/collector $(BINDEST)/collector
- 	./install-sh -c -m 550 -o root -g root  bin/print_data $(BINDEST)/print_data
++	./install-sh -c -m 550 bin/print_data $(BINDEST)/print_data
  
  install-conf:	
 -	[ -f $(ETCDEST)/mysqlstat.conf ] || ./install-sh -c -m 600 -o $(MYSQLSTAT_USER) -g root etc/mysqlstat.conf $(ETCDEST)/mysqlstat.conf
