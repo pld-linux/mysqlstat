@@ -10,9 +10,8 @@ diff -u ./print_data /tmp/print_data
  
  my $rdata = retrieve($fname) or die("Can't read $fname: $!");
  
-diff -u ./mysqlstat.cgi /tmp/mysqlstat.cgi
---- ./mysqlstat.cgi	2004-11-29 13:49:22.000000000 +0200
-+++ cgi-bin/mysqlstat.cgi.in	2004-11-29 13:57:18.000000000 +0200
+--- cgi-bin/mysqlstat.cgi.in~	2002-09-01 18:27:31.000000000 +0300
++++ cgi-bin/mysqlstat.cgi.in	2004-12-02 22:42:19.000000000 +0200
 @@ -4,7 +4,7 @@
  # $Id$
  
@@ -22,7 +21,7 @@ diff -u ./mysqlstat.cgi /tmp/mysqlstat.cgi
  
  $|=1;
  
-@@ -19,8 +19,8 @@
+@@ -19,11 +19,11 @@
  ###############################################################################
  # CONFIG BEGIN
  ###############################################################################
@@ -32,7 +31,11 @@ diff -u ./mysqlstat.cgi /tmp/mysqlstat.cgi
 +use constant WORK_DIR 		 => '/var/lib/mysqlstat';
  
  use constant SKIN_BASE_DIR	 => HOME_DIR.'/skins';
- use constant CACHE_DIR 		 => '/tmp';
+-use constant CACHE_DIR 		 => '/tmp';
++use constant CACHE_DIR 		 => '/var/lib/mysqlstat/cache';
+ ###############################################################################
+ # CONFIG END
+ ###############################################################################
 --- bin/collector.in	2004-11-29 14:28:06.000000000 +0200
 +++ bin/collector.in	2004-11-29 14:27:30.000000000 +0200
 @@ -1,6 +1,6 @@
