@@ -1,0 +1,56 @@
+diff -u ./print_data /tmp/print_data
+--- ./print_data	2002-08-05 20:13:05.000000000 +0300
++++ bin/print_data	2004-11-29 13:57:51.000000000 +0200
+@@ -4,7 +4,7 @@
+ use Storable;
+ use Data::Dumper;
+ 
+-my $fname = '../var/mysqlstat.dat';
++my $fname = '/var/lib/mysqlstat/mysqlstat.dat';
+ 
+ my $rdata = retrieve($fname) or die("Can't read $fname: $!");
+ 
+diff -u ./mysqlstat.cgi /tmp/mysqlstat.cgi
+--- ./mysqlstat.cgi	2004-11-29 13:49:22.000000000 +0200
++++ cgi-bin/mysqlstat.cgi.in	2004-11-29 13:57:18.000000000 +0200
+@@ -4,7 +4,7 @@
+ # $Id$
+ 
+ use strict;
+-use lib '@prefix@/mysqlstat/libs';
++use lib '/usr/lib/mysqlstat';
+ 
+ $|=1;
+ 
+@@ -19,8 +19,8 @@
+ ###############################################################################
+ # CONFIG BEGIN
+ ###############################################################################
+-use constant HOME_DIR 		 => '@prefix@/mysqlstat';
+-use constant WORK_DIR 		 => '@prefix@/mysqlstat/var';
++use constant HOME_DIR 		 => '/usr/share/mysqlstat';
++use constant WORK_DIR 		 => '/var/lib/mysqlstat';
+ 
+ use constant SKIN_BASE_DIR	 => HOME_DIR.'/skins';
+ use constant CACHE_DIR 		 => '/tmp';
+--- bin/collector.in	2004-11-29 14:28:06.000000000 +0200
++++ bin/collector.in	2004-11-29 14:27:30.000000000 +0200
+@@ -1,6 +1,6 @@
+ #!/usr/bin/perl -w
+ use strict;
+-use lib '@prefix@/mysqlstat/libs';
++use lib '/usr/lib/mysqlstat';
+ 
+ use mysqlstat;
+ 
+--- etc/mysqlstat.conf.in~	2002-09-01 18:27:31.000000000 +0300
++++ etc/mysqlstat.conf.in	2004-11-29 14:31:36.000000000 +0200
+@@ -1,7 +1,7 @@
+ #################################################
+ # Global configuration
+ #################################################
+-work_dir = @prefix@/mysqlstat/var
++work_dir = /var/lib/mysqlstat
+ 
+ #################################################
+ # Servers configuration
