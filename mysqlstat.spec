@@ -9,13 +9,14 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.17
+Release:	0.19
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
 Source0:	http://www.mysqlstat.org/dist/%{name}-%{version}-beta.tar.gz
 # Source0-md5:	234035de66c91675362487e55446ed5b
 Source1:	%{name}.cron
+Source2:	%{name}.conf
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-logo.patch
 URL:		http://www.mysqlstat.org/en/
@@ -95,7 +96,7 @@ This package contains the cgi-script for MYSQLSTAT.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache}
+install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache,/etc/httpd}
 
 %{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
@@ -109,6 +110,7 @@ install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cach
 cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/httpd/%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -129,6 +131,34 @@ if [ "$1" = "0" ]; then
 	%userremove mysqlstat
 fi
 
+%post cgi
+if [ -f /etc/httpd/httpd.conf ] && ! grep -q "^Include.*%{name}.conf" /etc/httpd/httpd.conf; then
+	echo "Include /etc/httpd/%{name}.conf" >> /etc/httpd/httpd.conf
+	if [ -f /var/lock/subsys/httpd ]; then
+		/usr/sbin/apachectl restart 1>&2
+	fi
+elif [ -d /etc/httpd/httpd.conf ]; then
+	ln -sf /etc/httpd/%{name}.conf /etc/httpd/httpd.conf/99_%{name}.conf
+	if [ -f /var/lock/subsys/httpd ]; then
+		/usr/sbin/apachectl restart 1>&2
+	fi
+fi
+
+%preun cgi
+if [ "$1" = "0" ]; then
+	umask 027
+	if [ -d /etc/httpd/httpd.conf ]; then
+		rm -f /etc/httpd/httpd.conf/99_%{name}.conf
+	else
+		grep -v "^Include.*%{name}.conf" /etc/httpd/httpd.conf > \
+			/etc/httpd/httpd.conf.tmp
+		mv -f /etc/httpd/httpd.conf.tmp /etc/httpd/httpd.conf
+	fi
+	if [ -f /var/lock/subsys/httpd ]; then
+		/usr/sbin/apachectl restart 1>&2
+	fi
+fi
+
 %files
 %defattr(644,root,root,755)
 %doc FAQ.RUS README.RUS TODO.RUS
@@ -146,6 +176,7 @@ fi
 
 %files cgi
 %defattr(644,root,root,755)
+%attr(640,root,http) %config(noreplace) %verify(not size mtime md5) /etc/httpd/%{name}.conf
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
 %attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
