@@ -8,7 +8,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.22
+Release:	1
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
