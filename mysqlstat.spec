@@ -38,6 +38,9 @@ Requires:	perl-HTML-Template >= 2.5
 Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
 Requires:	rrdtool >= 1.00
+Requires(pre):	/bin/id
+Requires(pre):	/usr/sbin/useradd
+Requires(postun):	/usr/sbin/userdel
 Provides:	user(mysqlstat)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
