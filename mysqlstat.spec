@@ -3,7 +3,8 @@
 #  - cronjob
 #  - apache config
 #  - description should say that it's web app?
-Summary:	MYSQLSTAT - A set of utilities to monitor, store and display Mysql DBMS usage statistics
+Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
+Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
 Release:	0.10
@@ -38,7 +39,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define	_sysconfdir	/etc/%{name}
 
 %description
-MYSQLSTAT - A set of utilities to monitor, store and display Mysql
+MYSQLSTAT - A set of utilities to monitor, store and display MySQL
 DBMS usage statistics.
 
 Types of stats: 
@@ -52,6 +53,21 @@ Types of stats:
 8. Types of queries 
 9. Temporary and disk tables usage 
 
+%description -l pl
+MYSQLSTAT - zestaw narzêdzi do monitorowania, zapisywania i
+wy¶wietlania statystyk systemu baz danych MySQL.
+
+Rodzaje statystyk:
+1. Liczba zapytañ (zapytania/sekundê)
+2. Liczba po³±czeñ (po³±czenia/sekundê)
+3. Wej¶cie/wyj¶cie danych (bajty/sekundê)
+4. ¯±dania zapisu klucza (¿±dania/sekundê)
+5. ¯±dania odczytu klucza (¿±dania/sekundê)
+6. Zapisy klucza (zapisy/sekundê)
+7. Odczyty klucza (odczyty/sekundê)
+8. Rodzaje zapytañ
+9. Wykorzystanie tabel tymczasowych i na dysku
+
 %prep
 %setup -q -n %{name}-%{version}-beta
 %patch0 -p0
@@ -62,8 +78,7 @@ Types of stats:
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
-install -d $RPM_BUILD_ROOT/%{_datadir}/%{name}
+install -d $RPM_BUILD_ROOT%{_datadir}/%{name}
 
 %{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
