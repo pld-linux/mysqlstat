@@ -8,7 +8,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.19
+Release:	0.20
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -29,6 +29,7 @@ BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.159
+BuildRequires:	fakeroot
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -50,16 +51,16 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 MYSQLSTAT - A set of utilities to monitor, store and display MySQL
 DBMS usage statistics.
 
-Types of stats: 
-1. Number of queries (queries/sec) 
-2. Number of Connections (conn/sec) 
-3. Data In/Out (bytes/sec) 
-4. Key write requests (requests/sec) 
-5. Key read requests (requests/sec) 
-6. Key writes (writes/sec) 
-7. Key reads (reads/sec) 
-8. Types of queries 
-9. Temporary and disk tables usage 
+Types of stats:
+1. Number of queries (queries/sec)
+2. Number of Connections (conn/sec)
+3. Data In/Out (bytes/sec)
+4. Key write requests (requests/sec)
+5. Key read requests (requests/sec)
+6. Key writes (writes/sec)
+7. Key reads (reads/sec)
+8. Types of queries
+9. Temporary and disk tables usage
 
 %description -l pl
 MYSQLSTAT - zestaw narzêdzi do monitorowania, zapisywania i
@@ -101,16 +102,13 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache,/etc/httpd}
 
-%{__make} install \
+fakeroot %{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	ETCDEST=$RPM_BUILD_ROOT%{_sysconfdir} \
 	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	VARDEST=$RPM_BUILD_ROOT/var/lib/%{name} \
 	LIBSDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
-	MYSQLSTAT_USER=%(id -un) \
-	MYSQLSTAT_GROUP=%(id -gn) \
-
-cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
+	HOME=$RPM_BUILD_ROOT%{_datadir}/%{name} \
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/httpd/%{name}.conf
