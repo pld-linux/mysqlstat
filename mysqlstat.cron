@@ -1,4 +1,5 @@
 # vim:syn=crontab
 # crontab for mysqlstat
 
+MAILTO=root
 */5 * * * * mysqlstat /usr/lib/mysqlstat/collector -c /etc/mysqlstat/mysqlstat.conf
