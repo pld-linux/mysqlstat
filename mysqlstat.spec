@@ -77,13 +77,17 @@ Rodzaje statystyk:
 9. Wykorzystanie tabel tymczasowych i na dysku
 
 %package cgi
-Summary:	MYSQLSTAT - cgi subpackage
+Summary:	MYSQLSTAT - CGI script
+Summary(pl):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	webserver
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
+
+%description cgi -l pl
+Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 
 %prep
 %setup -q -n %{name}-%{version}-beta
