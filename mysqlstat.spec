@@ -1,5 +1,6 @@
 # TODO
-#  - cronjob -- R: crondaemon (clamav doesn't depend on it)
+#  - cronjob -- Require: crondaemon? (clamav doesn't depend on it, but should we?)
+#  - cron to clean cachedir?
 #  - apache config
 
 %define	userid	138
@@ -8,7 +9,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.16
+Release:	0.17
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -77,6 +78,7 @@ Rodzaje statystyk:
 Summary:	MYSQLSTAT - cgi subpackage
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	webserver
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
@@ -91,7 +93,7 @@ This package contains the cgi-script for MYSQLSTAT.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name}}
+install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache}
 
 %{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
@@ -155,3 +157,4 @@ fi
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
 %attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
+%dir %attr(750,http,http) /var/lib/%{name}/cache
