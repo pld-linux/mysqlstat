@@ -1,0 +1,37 @@
+--- Makefile.in~	2002-09-01 15:30:05.000000000 +0300
++++ Makefile.in	2004-12-09 14:53:04.000000000 +0200
+@@ -49,15 +49,15 @@
+ 	@echo Please read documentation before using MySQLStat
+ 
+ install-dir:
+-	[ -d $(HOME) ] || ./install-sh -d -m 755 -o $(MYSQLSTAT_USER) -g root $(HOME)
+-	[ -d $(VARDEST) ] || ./install-sh -d -m 755 -o $(MYSQLSTAT_USER) -g root $(VARDEST)
++	[ -d $(HOME) ] || ./install-sh -d -m 755 $(HOME)
++	[ -d $(VARDEST) ] || ./install-sh -d -m 755 $(VARDEST)
+ 
+ install-bin:
+-	./install-sh -c -m 550 -o $(MYSQLSTAT_USER) -g root bin/collector $(BINDEST)/collector
++	./install-sh -c -m 550 bin/collector $(BINDEST)/collector
+ 	./install-sh -c -m 550 -o root -g root  bin/print_data $(BINDEST)/print_data
+ 
+ install-conf:	
+-	[ -f $(ETCDEST)/mysqlstat.conf ] || ./install-sh -c -m 600 -o $(MYSQLSTAT_USER) -g root etc/mysqlstat.conf $(ETCDEST)/mysqlstat.conf
++	[ -f $(ETCDEST)/mysqlstat.conf ] || ./install-sh -c -m 600 etc/mysqlstat.conf $(ETCDEST)/mysqlstat.conf
+ 
+ install-skin:
+ 	[ -d $(HOME)/skins ] ||./install-sh -d -m 755 $(HOME)/skins
+@@ -68,12 +68,12 @@
+ install-cgi:
+ 	[ -d $(CGIBINDEST) ] || ./install-sh -d -m 755 $(CGIBINDEST)
+ 	for file in cgi-bin/*.cgi; do \
+-	    ./install-sh -c -m 555 -o $(MYSQLSTAT_USER) -g root $$file $(CGIBINDEST)/`basename $$file`; \
++	    ./install-sh -c -m 555 $$file $(CGIBINDEST)/`basename $$file`; \
+ 	done
+ 	chmod +x $(CGIBINDEST)/*.cgi
+ 
+ install-libs:
+-	./install-sh -c -m 644 -o $(MYSQLSTAT_USER) -g root libs/mysqlstat.pm $(LIBSDEST)/mysqlstat.pm
++	./install-sh -c -m 644 libs/mysqlstat.pm $(LIBSDEST)/mysqlstat.pm
+ 
+ clean:
+ 	rm -f $(CLEANFILES)
