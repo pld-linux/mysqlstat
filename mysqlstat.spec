@@ -1,8 +1,6 @@
 # TODO
-#  - cronjob
+#  - cronjob -- R: crondaemon (clamav doesn't depend on it)
 #  - apache config
-#  - not sure if requirement for group(http) is really only way, because the
-#    statistics gather part really doesn't need web server
 
 %define	userid	138
 
@@ -10,12 +8,13 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.11
+Release:	0.16
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
 Source0:	http://www.mysqlstat.org/dist/%{name}-%{version}-beta.tar.gz
 # Source0-md5:	234035de66c91675362487e55446ed5b
+Source1:	%{name}.cron
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-logo.patch
 URL:		http://www.mysqlstat.org/en/
@@ -29,8 +28,6 @@ BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.159
-# won't work at this moment; group provided by setup
-#Requires:	group(http)
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -41,6 +38,7 @@ Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
 Requires:	rrdtool >= 1.00
 Provides:	user(mysqlstat)
+Provides:	group(http)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	_sysconfdir	/etc/%{name}
@@ -75,6 +73,14 @@ Rodzaje statystyk:
 8. Rodzaje zapytañ
 9. Wykorzystanie tabel tymczasowych i na dysku
 
+%package cgi
+Summary:	MYSQLSTAT - cgi subpackage
+Group:		Applications/WWW
+Requires:	%{name} = %{epoch}:%{version}-%{release}
+
+%description cgi
+This package contains the cgi-script for MYSQLSTAT.
+
 %prep
 %setup -q -n %{name}-%{version}-beta
 %patch0 -p0
@@ -85,7 +91,7 @@ Rodzaje statystyk:
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT%{_datadir}/%{name}
+install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name}}
 
 %{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
@@ -98,10 +104,21 @@ install -d $RPM_BUILD_ROOT%{_datadir}/%{name}
 
 cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
 
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %pre
+if [ -n "`getgid http`" ]; then
+    if [ "`getgid http`" != "51" ]; then
+        echo "Error: group http doesn't have gid=51. Correct this before installing %{name}." 1>&2
+        exit 1
+    fi
+else
+    /usr/sbin/groupadd -g 51 -r -f http
+fi
+
 if [ -n "`/bin/id -u mysqlstat 2>/dev/null`" ]; then
 	if [ "`/bin/id -u mysqlstat`" != %{userid} ]; then
 		echo "Error: user mysqlstat doesn't have uid=%{userid}. Correct this before installing %{name}." 1>&2
@@ -114,6 +131,7 @@ fi
 
 %postun
 if [ "$1" = "0" ]; then
+    %groupremove http
 	%userremove mysqlstat
 fi
 
@@ -123,13 +141,17 @@ fi
 
 %attr(700,mysqlstat,root) %dir %{_sysconfdir}
 %attr(600,mysqlstat,root) %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*
-%dir %attr(710,mysqlstat,http) /var/lib/%{name}
+%dir %attr(750,mysqlstat,http) /var/lib/%{name}
 
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/mysqlstat.pm
 %attr(755,root,root) %{_libdir}/%{name}/collector
 %attr(755,root,root) %{_libdir}/%{name}/print_data
-%attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
 
+%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/cron.d/%{name}
+
+%files cgi
+%defattr(644,root,root,755)
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
+%attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
