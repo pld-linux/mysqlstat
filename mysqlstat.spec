@@ -31,7 +31,6 @@ BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.159
-BuildRequires:	fakeroot
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -105,7 +104,7 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache,/etc/httpd}
 
-fakeroot %{__make} install \
+%{__make} install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	ETCDEST=$RPM_BUILD_ROOT%{_sysconfdir} \
 	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
