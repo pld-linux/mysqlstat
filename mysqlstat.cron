@@ -1,0 +1,4 @@
+# vim:syn=crontab
+# crontab for mysqlstat
+
+#5 * * * * mysqlstat /usr/lib/mysqlstat/collector -c /etc/mysqlstat/mysqlstat.conf
