@@ -6,12 +6,14 @@
 Summary:	MYSQLSTAT - A set of utilities to monitor, store and display Mysql DBMS usage statistics
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.1
+Release:	0.10
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
 Source0:	http://www.mysqlstat.org/dist/%{name}-%{version}-beta.tar.gz
 # Source0-md5:	234035de66c91675362487e55446ed5b
+Patch0:		%{name}-paths.patch
+Patch1:		%{name}-logo.patch
 URL:		http://www.mysqlstat.org/en/
 BuildRequires:	perl-AppConfig >= 1.52
 BuildRequires:	perl-CGI >= 2.752
@@ -34,7 +36,6 @@ Requires:	rrdtool >= 1.00
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	_sysconfdir	/etc/%{name}
-%define	_cgidir	/home/services/httpd/cgi-bin
 
 %description
 MYSQLSTAT - A set of utilities to monitor, store and display Mysql
@@ -53,6 +54,8 @@ Types of stats:
 
 %prep
 %setup -q -n %{name}-%{version}-beta
+%patch0 -p0
+%patch1 -p0
 
 %build
 %configure2_13
@@ -60,14 +63,18 @@ Types of stats:
 %install
 rm -rf $RPM_BUILD_ROOT
 
+install -d $RPM_BUILD_ROOT/%{_datadir}/%{name}
+
 %{__make} install \
-	BINDEST=$RPM_BUILD_ROOT%{_bindir} \
+	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	ETCDEST=$RPM_BUILD_ROOT%{_sysconfdir} \
-	CGIBINDEST=$RPM_BUILD_ROOT%{_cgidir} \
-	VARDEST=$RPM_BUILD_ROOT%{_localstatedir}/%{name} \
+	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
+	VARDEST=$RPM_BUILD_ROOT/var/lib/%{name} \
 	LIBSDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	MYSQLSTAT_USER=%(id -un) \
 	MYSQLSTAT_GROUP=%(id -gn) \
+
+cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -75,8 +82,16 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc FAQ.RUS README.RUS TODO.RUS
-%attr(755,root,root) %{_bindir}/*
-%{_sysconfdir}
-%{_libdir}/%{name}
-%{_localstatedir}/%{name}
-%attr(755,root,root) %{_cgidir}/*
+
+%attr(700,root,root) %dir %{_sysconfdir}
+%attr(600,root,root) %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*
+%dir %attr(710,root,http) /var/lib/%{name}
+
+%dir %{_libdir}/%{name}
+%{_libdir}/%{name}/mysqlstat.pm
+%attr(755,root,root) %{_libdir}/%{name}/collector
+%attr(755,root,root) %{_libdir}/%{name}/print_data
+%attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
+
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/*
