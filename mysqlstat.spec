@@ -1,7 +1,6 @@
 # TODO
 #  - cronjob -- Require: crondaemon? (clamav doesn't depend on it, but should we?)
 #  - cron to clean cachedir?
-#  - apache config
 
 %define	userid	138
 
