@@ -19,6 +19,7 @@ Source2:	%{name}-apache.conf
 Source3:	%{name}.conf
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-logo.patch
+Patch2:		%{name}-owner.patch
 URL:		http://www.mysqlstat.org/en/
 BuildRequires:	perl-AppConfig >= 1.52
 BuildRequires:	perl-CGI >= 2.752
@@ -95,6 +96,7 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 %setup -q -n %{name}-%{version}-beta
 %patch0 -p0
 %patch1 -p0
+%patch2 -p0
 
 %build
 %configure2_13
