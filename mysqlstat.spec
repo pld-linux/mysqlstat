@@ -39,7 +39,6 @@ Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
 Requires:	rrdtool >= 1.00
 Provides:	user(mysqlstat)
-Provides:	group(http)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	_sysconfdir	/etc/%{name}
@@ -112,15 +111,6 @@ install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-if [ -n "`getgid http`" ]; then
-    if [ "`getgid http`" != "51" ]; then
-        echo "Error: group http doesn't have gid=51. Correct this before installing %{name}." 1>&2
-        exit 1
-    fi
-else
-    /usr/sbin/groupadd -g 51 -r -f http
-fi
-
 if [ -n "`/bin/id -u mysqlstat 2>/dev/null`" ]; then
 	if [ "`/bin/id -u mysqlstat`" != %{userid} ]; then
 		echo "Error: user mysqlstat doesn't have uid=%{userid}. Correct this before installing %{name}." 1>&2
@@ -133,7 +123,6 @@ fi
 
 %postun
 if [ "$1" = "0" ]; then
-    %groupremove http
 	%userremove mysqlstat
 fi
 
