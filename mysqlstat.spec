@@ -1,6 +1,5 @@
 # TODO
 #  - cronjob -- Require: crondaemon? (clamav doesn't depend on it, but should we?)
-#  - cron to clean cachedir?
 
 %define	userid	138
 
@@ -8,7 +7,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2
+Release:	2.9
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -46,44 +45,49 @@ Requires(postun):	/usr/sbin/userdel
 Provides:	user(mysqlstat)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define	_sysconfdir	/etc/%{name}
+%define		_sysconfdir	/etc/%{name}
+%define		_apache1dir	/etc/apache
+%define		_apache2dir	/etc/httpd
 
 %description
 MYSQLSTAT - A set of utilities to monitor, store and display MySQL
 DBMS usage statistics.
 
 Types of stats:
-1. Number of queries (queries/sec)
-2. Number of Connections (conn/sec)
-3. Data In/Out (bytes/sec)
-4. Key write requests (requests/sec)
-5. Key read requests (requests/sec)
-6. Key writes (writes/sec)
-7. Key reads (reads/sec)
-8. Types of queries
-9. Temporary and disk tables usage
+- Number of queries (queries/sec)
+- Number of Connections (conn/sec)
+- Data In/Out (bytes/sec)
+- Key write requests (requests/sec)
+- Key read requests (requests/sec)
+- Key writes (writes/sec)
+- Key reads (reads/sec)
+- Types of queries
+- Temporary and disk tables usage
 
 %description -l pl
 MYSQLSTAT - zestaw narzêdzi do monitorowania, zapisywania i
 wy¶wietlania statystyk systemu baz danych MySQL.
 
 Rodzaje statystyk:
-1. Liczba zapytañ (zapytania/sekundê)
-2. Liczba po³±czeñ (po³±czenia/sekundê)
-3. Wej¶cie/wyj¶cie danych (bajty/sekundê)
-4. ¯±dania zapisu klucza (¿±dania/sekundê)
-5. ¯±dania odczytu klucza (¿±dania/sekundê)
-6. Zapisy klucza (zapisy/sekundê)
-7. Odczyty klucza (odczyty/sekundê)
-8. Rodzaje zapytañ
-9. Wykorzystanie tabel tymczasowych i na dysku
+- Liczba zapytañ (zapytania/sekundê)
+- Liczba po³±czeñ (po³±czenia/sekundê)
+- Wej¶cie/wyj¶cie danych (bajty/sekundê)
+- ¯±dania zapisu klucza (¿±dania/sekundê)
+- ¯±dania odczytu klucza (¿±dania/sekundê)
+- Zapisy klucza (zapisy/sekundê)
+- Odczyty klucza (odczyty/sekundê)
+- Rodzaje zapytañ
+- Wykorzystanie tabel tymczasowych i na dysku
 
 %package cgi
 Summary:	MYSQLSTAT - CGI script
 Summary(pl):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
-Requires:	webserver
+Requires:	webserver = apache
+Requires:	apache(mod_access)
+Requires:	apache(mod_alias)
+Requires:	apache(mod_cgi)
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
@@ -113,8 +117,8 @@ install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cach
 	HOME=$RPM_BUILD_ROOT%{_datadir}/%{name} \
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
-install %{SOURCE2} $RPM_BUILD_ROOT/etc/httpd/%{name}.conf
-install %{SOURCE3} $RPM_BUILD_ROOT/etc/%{name}/%{name}.conf
+install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/apache-%{name}.conf
+install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -135,32 +139,56 @@ if [ "$1" = "0" ]; then
 	%userremove mysqlstat
 fi
 
-%post cgi
-if [ -f /etc/httpd/httpd.conf ] && ! grep -q "^Include.*%{name}.conf" /etc/httpd/httpd.conf; then
-	echo "Include /etc/httpd/%{name}.conf" >> /etc/httpd/httpd.conf
-	if [ -f /var/lock/subsys/httpd ]; then
-		/usr/sbin/apachectl restart 1>&2
-	fi
-elif [ -d /etc/httpd/httpd.conf ]; then
-	ln -sf /etc/httpd/%{name}.conf /etc/httpd/httpd.conf/99_%{name}.conf
-	if [ -f /var/lock/subsys/httpd ]; then
-		/usr/sbin/apachectl restart 1>&2
+%preun cgi
+if [ "$1" = "0" ]; then
+	rm -f /var/lib/%{name}/cache/* 2>/dev/null || :
+fi
+
+%triggerin cgi -- apache1 >= 1.3.33-2
+if [ "$1" = "1" ] && [ "$2" = "1" ] && [ -d %{_apache1dir}/conf.d ]; then
+	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache1dir}/conf.d/99_%{name}.conf
+	if [ -f /var/lock/subsys/apache ]; then
+		/etc/rc.d/init.d/apache restart 1>&2
 	fi
 fi
 
-%preun cgi
-if [ "$1" = "0" ]; then
-	umask 027
-	if [ -d /etc/httpd/httpd.conf ]; then
-		rm -f /etc/httpd/httpd.conf/99_%{name}.conf
-	else
-		grep -v "^Include.*%{name}.conf" /etc/httpd/httpd.conf > \
-			/etc/httpd/httpd.conf.tmp
-		mv -f /etc/httpd/httpd.conf.tmp /etc/httpd/httpd.conf
+%triggerun cgi -- apache1 >= 1.3.33-2
+if [ "$1" = "0" ] || [ "$2" = "0" ]; then
+	if [ -L %{_apache1dir}/conf.d/99_%{name}.conf ]; then
+		rm -f %{_apache1dir}/conf.d/99_%{name}.conf
+		if [ -f /var/lock/subsys/apache ]; then
+			/etc/rc.d/init.d/apache restart 1>&2
+		fi
 	fi
+fi
+
+%triggerin cgi -- apache >= 2.0.0
+if [ "$1" = "1" ] && [ "$2" = "1" ] && [ -d %{_apache2dir}/httpd.conf ]; then
+	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache2dir}/httpd.conf/99_%{name}.conf
 	if [ -f /var/lock/subsys/httpd ]; then
-		/usr/sbin/apachectl restart 1>&2
+		/etc/rc.d/init.d/httpd restart 1>&2
 	fi
+fi
+
+%triggerun cgi -- apache >= 2.0.0
+if [ "$1" = "0" ] || [ "$2" = "0" ]; then
+	if [ -L %{_apache2dir}/httpd.conf/99_%{name}.conf ]; then
+		rm -f %{_apache2dir}/httpd.conf/99_%{name}.conf
+		if [ -f /var/lock/subsys/httpd ]; then
+			/etc/rc.d/init.d/httpd restart 1>&2
+		fi
+	fi
+fi
+
+# config path changed, trigger it
+%triggerpostun cgi -- %{name}-cgi < 0.0.0.4-2.3
+if [ -f /etc/httpd/mysqlstat.conf.rpmsave ]; then
+	cp -f %{_sysconfdir}/apache-%{name}.conf{,.rpmnew}
+	mv -f /etc/httpd/mysqlstat.conf.rpmsave %{_sysconfdir}/apache-%{name}.conf
+fi
+if [ -d %{_apache2dir}/httpd.conf ]; then
+	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache2dir}/httpd.conf/99_%{name}.conf
+	# no apache restart, as the config hasn't changed
 fi
 
 %files
@@ -168,7 +196,8 @@ fi
 %doc FAQ.RUS README.RUS TODO.RUS
 
 %attr(700,mysqlstat,root) %dir %{_sysconfdir}
-%attr(600,mysqlstat,root) %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*
+%attr(600,mysqlstat,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/*
+
 %dir %attr(750,mysqlstat,http) /var/lib/%{name}
 
 %dir %{_libdir}/%{name}
@@ -176,11 +205,11 @@ fi
 %attr(755,root,root) %{_libdir}/%{name}/collector
 %attr(755,root,root) %{_libdir}/%{name}/print_data
 
-%attr(640,root,root) %config(noreplace) %verify(not size mtime md5) /etc/cron.d/%{name}
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/cron.d/%{name}
 
 %files cgi
 %defattr(644,root,root,755)
-%attr(640,root,http) %config(noreplace) %verify(not size mtime md5) /etc/httpd/%{name}.conf
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/apache-%{name}.conf
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
 %attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
