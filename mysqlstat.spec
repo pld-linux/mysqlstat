@@ -29,7 +29,8 @@ BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.159
-Requires:	group(http)
+# won't work at this moment; group provided by setup
+#Requires:	group(http)
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -101,13 +102,19 @@ cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-[ "`/bin/id -u mysqlstat 2>/dev/null`" ] || \
+if [ -n "`/bin/id -u mysqlstat 2>/dev/null`" ]; then
+	if [ "`/bin/id -u mysqlstat`" != %{userid} ]; then
+		echo "Error: user mysqlstat doesn't have uid=%{userid}. Correct this before installing %{name}." 1>&2
+		exit 1
+	fi
+else
 	/usr/sbin/useradd -u %{userid} -d /usr/share/mysqlstat \
 		-s /bin/false -g http -c "MySQL Statistics" mysqlstat
+fi
 
 %postun
 if [ "$1" = "0" ]; then
-    %userremove mysqlstat
+	%userremove mysqlstat
 fi
 
 %files
