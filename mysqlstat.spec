@@ -1,13 +1,16 @@
 # TODO
-#  - user mysqlstat? or http
 #  - cronjob
 #  - apache config
-#  - description should say that it's web app?
+#  - not sure if requirement for group(http) is really only way, because the
+#    statistics gather part really doesn't need web server
+
+%define	userid	138
+
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	0.10
+Release:	0.11
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -25,6 +28,8 @@ BuildRequires:	perl-HTML-Template >= 2.5
 BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
+BuildRequires:	rpmbuild(macros) >= 1.159
+Requires:	group(http)
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -34,6 +39,7 @@ Requires:	perl-HTML-Template >= 2.5
 Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
 Requires:	rrdtool >= 1.00
+Provides:	user(mysqlstat)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define	_sysconfdir	/etc/%{name}
@@ -94,13 +100,23 @@ cp -a skins $RPM_BUILD_ROOT%{_datadir}/%{name}
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre
+[ "`/bin/id -u mysqlstat 2>/dev/null`" ] || \
+	/usr/sbin/useradd -u %{userid} -d /usr/share/mysqlstat \
+		-s /bin/false -g http -c "MySQL Statistics" mysqlstat
+
+%postun
+if [ "$1" = "0" ]; then
+    %userremove mysqlstat
+fi
+
 %files
 %defattr(644,root,root,755)
 %doc FAQ.RUS README.RUS TODO.RUS
 
-%attr(700,root,root) %dir %{_sysconfdir}
-%attr(600,root,root) %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*
-%dir %attr(710,root,http) /var/lib/%{name}
+%attr(700,mysqlstat,root) %dir %{_sysconfdir}
+%attr(600,mysqlstat,root) %config(noreplace) %verify(not size mtime md5) %{_sysconfdir}/*
+%dir %attr(710,mysqlstat,http) /var/lib/%{name}
 
 %dir %{_libdir}/%{name}
 %{_libdir}/%{name}/mysqlstat.pm
