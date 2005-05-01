@@ -29,7 +29,7 @@ BuildRequires:	perl-HTML-Template >= 2.5
 BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
-BuildRequires:	rpmbuild(macros) >= 1.159
+BuildRequires:	rpmbuild(macros) >= 1.202
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
@@ -124,15 +124,7 @@ install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-if [ -n "`/bin/id -u mysqlstat 2>/dev/null`" ]; then
-	if [ "`/bin/id -u mysqlstat`" != %{userid} ]; then
-		echo "Error: user mysqlstat doesn't have uid=%{userid}. Correct this before installing %{name}." 1>&2
-		exit 1
-	fi
-else
-	/usr/sbin/useradd -u %{userid} -d /usr/share/mysqlstat \
-		-s /bin/false -g http -c "MySQL Statistics" mysqlstat
-fi
+%useradd -u %{userid} -d /usr/share/mysqlstat -s /bin/false -g http -c "MySQL Statistics" mysqlstat
 
 %postun
 if [ "$1" = "0" ]; then
