@@ -57,3 +57,14 @@ diff -u ./print_data /tmp/print_data
  
  #################################################
  # Servers configuration
+--- libs/mysqlstat.pm.in	2002-09-01 18:27:31.000000000 +0300
++++ libs/mysqlstat.pm.in	2005-05-17 11:56:36.000000000 +0300
+@@ -117,7 +117,7 @@
+ sub findConfigFile {
+   my $config_file = '';
+ 
+-  my @dirs = qw(@prefix@/mysqlstat/etc/mysqlstat.conf /etc/mysqlstat.conf /usr/local/etc/mysqlstat.conf);
++  my @dirs = qw(/etc/mysqlstat/mysqlstat.conf /etc/mysqlstat.conf);
+ 
+   unshift (@dirs,$ENV{HOME}."/.mysqlstat.conf") if ($ENV{HOME});
+ 
