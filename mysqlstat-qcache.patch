@@ -1,0 +1,93 @@
+--- ./cgi-bin/mysqlstat.cgi.in	2005-05-17 12:14:21.000000000 +0300
++++ ./cgi-bin/mysqlstat.cgi.in	2005-05-17 11:58:47.000000000 +0300
+@@ -38,7 +38,7 @@
+ 	{ name => 'Tmp tables usage',	value => 'tmp',			current => 0 , version => 32300 },
+ 	{ name => 'Key reads',     		value => 'key_read',	current => 0 , version => 32300 },
+ 	{ name => 'Key writes',    		value => 'key_write',	current => 0 , version => 32300 },
+-	{ name => 'Query cache',   		value => 'query_cache',	current => 0 , version => 90000 },	
++	{ name => 'Query cache',   		value => 'query_cache',	current => 0 , version => 40000 },	
+ 	{ name => 'Status',    			value => 'status',		current => 0 , version => 32200 },
+ );
+ 
+@@ -357,6 +357,27 @@
+ 			'GPRINT:W:MAX:max=%.0lf)',
+ 			'COMMENT:\n',
+ 		);
++	}elsif($mode eq 'query_cache'){
++		push(@options,'-v','Q/sec');
++
++		push(@DEF,'DEF:T='.$rrd_file.':Com_select:AVERAGE');
++		push(@DEF,'DEF:W='.$rrd_file.':Qcache_hits:AVERAGE');
++
++		push(@PLOT,
++			'AREA:T#0000FF:Command SELECT',
++			'GPRINT:T:LAST:(current=%.0lf',
++			'GPRINT:T:AVERAGE:ave=%.0lf',
++			'GPRINT:T:MAX:max=%.0lf)',
++			'COMMENT:\n',
++		);
++
++		push(@PLOT,
++			'AREA:W#FFFF00:Qcache Hits',
++			'GPRINT:W:LAST:(current=%.0lf',
++			'GPRINT:W:AVERAGE:ave=%.0lf',
++			'GPRINT:W:MAX:max=%.0lf)',
++			'COMMENT:\n',
++		);
+ 	}else{
+ 		push(@options,'-v','Q/sec');
+ 
+@@ -414,6 +435,8 @@
+ 	}
+ 
+   RRDs::graph($out_file, @options, @DEF, @PLOT, @LEGEND);
++  my $ERR = RRDs::error;
++  warn "RRDs: $ERR" if $ERR;
+ 
+   if ($cached){
+   	local $/ = undef;
+@@ -515,3 +538,5 @@
+ 
+ 	return @s;
+ }
++
++# vim:ts=2:sw=2
+--- ./libs/mysqlstat.pm.in	2002-09-01 18:27:31.000000000 +0300
++++ ./libs/mysqlstat.pm.in	2005-05-17 11:56:36.000000000 +0300
+@@ -339,6 +339,7 @@
+ 	Key_reads
+ 	Key_write_requests
+ 	Key_writes
++	Qcache_hits
+ );
+ 
+ my %RRD_DS_TYPE = qw(
+@@ -361,6 +362,7 @@
+ 	Key_reads								COUNTER
+ 	Key_write_requests			COUNTER
+ 	Key_writes							COUNTER
++	Qcache_hits							COUNTER
+ );
+ 
+ my @RRD_RRA = (
+@@ -422,10 +424,10 @@
+  		my $ds_name = substr($_,0,19);
+ 
+  		push(@ds,$ds_name);
+- 		push(@value,	(defined($status) && exists($status->{$_}))?$status->{$_}:'U');
++ 		push(@value, (defined($status) && exists($status->{$_})) ? $status->{$_} : 'U');
+  	}
+ 
+-  print "RRDs::update($rrd_file);\n" if ($config->{verbose}>2);
++  print "RRDs::update($rrd_file,'-t',", join(':', @ds), ",", join(':', @value), ");\n" if ($config->{verbose}>2);
+ 
+ 	RRDs::update($rrd_file,'-t',join(':',@ds),join(':',@value));
+ 
+@@ -706,4 +708,5 @@
+ 	}
+ }
+ 
+-1;
+\ No newline at end of file
++1;
++# vim:ts=2:sw=2
