@@ -7,7 +7,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.11
+Release:	2.13
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -19,6 +19,7 @@ Source3:	%{name}.conf
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-logo.patch
 Patch2:		%{name}-owner.patch
+Patch3:		%{name}-qcache.patch
 URL:		http://www.mysqlstat.org/en/
 BuildRequires:	perl-AppConfig >= 1.52
 BuildRequires:	perl-CGI >= 2.752
@@ -87,6 +88,7 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	webserver = apache
 Requires:	apache(mod_access)
 Requires:	apache(mod_alias)
+Requires:	apache(mod_auth)
 Requires:	apache(mod_cgi)
 
 %description cgi
@@ -100,6 +102,7 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 %patch0 -p0
 %patch1 -p0
 %patch2 -p0
+%patch3 -p0
 
 %build
 %configure2_13
