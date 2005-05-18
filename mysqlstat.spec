@@ -1,8 +1,5 @@
 # TODO
 #  - cronjob -- Require: crondaemon? (clamav doesn't depend on it, but should we?)
-
-%define	userid	138
-
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
@@ -127,7 +124,7 @@ install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-%useradd -u %{userid} -d /usr/share/mysqlstat -s /bin/false -g http -c "MySQL Statistics" mysqlstat
+%useradd -u 138 -d /usr/share/mysqlstat -s /bin/false -g http -c "MySQL Statistics" mysqlstat
 
 %postun
 if [ "$1" = "0" ]; then
