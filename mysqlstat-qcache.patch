@@ -91,3 +91,80 @@
 \ No newline at end of file
 +1;
 +# vim:ts=2:sw=2
+--- ../cgi-bin/mysqlstat.cgi.in~	2005-05-18 10:57:54.000000000 +0300
++++ ../cgi-bin/mysqlstat.cgi.in	2005-05-17 17:03:20.000000000 +0300
+@@ -360,24 +360,44 @@
+ 	}elsif($mode eq 'query_cache'){
+ 		push(@options,'-v','Q/sec');
+ 
+-		push(@DEF,'DEF:T='.$rrd_file.':Com_select:AVERAGE');
+-		push(@DEF,'DEF:W='.$rrd_file.':Qcache_hits:AVERAGE');
++		push(@DEF,'DEF:S='.$rrd_file.':Com_select:AVERAGE');
++		push(@DEF,'DEF:I='.$rrd_file.':Qcache_inserts:AVERAGE');
++		push(@DEF,'DEF:H='.$rrd_file.':Qcache_hits:AVERAGE');
++		push(@DEF,'DEF:N='.$rrd_file.':Qcache_not_cached:AVERAGE');
+ 
+ 		push(@PLOT,
+-			'AREA:T#0000FF:Command SELECT',
+-			'GPRINT:T:LAST:(current=%.0lf',
+-			'GPRINT:T:AVERAGE:ave=%.0lf',
+-			'GPRINT:T:MAX:max=%.0lf)',
++			'AREA:S#FFFF00:Command SELECT',
++			'GPRINT:S:LAST:(current=%.0lf',
++			'GPRINT:S:AVERAGE:ave=%.0lf',
++			'GPRINT:S:MAX:max=%.0lf)',
+ 			'COMMENT:\n',
+ 		);
+ 
+ 		push(@PLOT,
+-			'AREA:W#FFFF00:Qcache Hits',
+-			'GPRINT:W:LAST:(current=%.0lf',
+-			'GPRINT:W:AVERAGE:ave=%.0lf',
+-			'GPRINT:W:MAX:max=%.0lf)',
++			'AREA:I#0000FF:Qcache Inserts',
++			'GPRINT:I:LAST:(current=%.0lf',
++			'GPRINT:I:AVERAGE:ave=%.0lf',
++			'GPRINT:I:MAX:max=%.0lf)',
++			'COMMENT:\n',
++		);
++
++		push(@PLOT,
++			'AREA:H#00FF00:Qcache Hits',
++			'GPRINT:H:LAST:(current=%.0lf',
++			'GPRINT:H:AVERAGE:ave=%.0lf',
++			'GPRINT:H:MAX:max=%.0lf)',
+ 			'COMMENT:\n',
+ 		);
++
++		push(@PLOT,
++			'AREA:N#FF0000:Qcache not cached',
++			'GPRINT:N:LAST:(current=%.0lf',
++			'GPRINT:N:AVERAGE:ave=%.0lf',
++			'GPRINT:N:MAX:max=%.0lf)',
++			'COMMENT:\n',
++		);
++
++
+ 	}else{
+ 		push(@options,'-v','Q/sec');
+ 
+--- ../libs/mysqlstat.pm.in~	2005-05-18 10:57:54.000000000 +0300
++++ ../libs/mysqlstat.pm.in	2005-05-17 16:54:24.000000000 +0300
+@@ -340,6 +340,8 @@
+ 	Key_write_requests
+ 	Key_writes
+ 	Qcache_hits
++	Qcache_inserts
++	Qcache_not_cached
+ );
+ 
+ my %RRD_DS_TYPE = qw(
+@@ -363,6 +365,8 @@
+ 	Key_write_requests			COUNTER
+ 	Key_writes							COUNTER
+ 	Qcache_hits							COUNTER
++	Qcache_inserts					COUNTER
++	Qcache_not_cached				COUNTER
+ );
+ 
+ my @RRD_RRA = (
