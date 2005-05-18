@@ -7,7 +7,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.13
+Release:	2.15
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -102,7 +102,7 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 %patch0 -p0
 %patch1 -p0
 %patch2 -p0
-%patch3 -p0
+%patch3 -p1
 
 %build
 %configure2_13
@@ -187,6 +187,12 @@ if [ -d %{_apache2dir}/httpd.conf ]; then
 		/etc/rc.d/init.d/httpd restart 1>&2
 	fi
 fi
+
+%triggerpostun -- %{name}-cgi < 0.0.0.4-2.14
+echo >&2 "IMPORTANT: Renaming .rrd files to .old as the file format has changed!"
+for a in /var/lib/%{name}/*.rrd; do
+	mv -v $a $a.old
+done
 
 %files
 %defattr(644,root,root,755)
