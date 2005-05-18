@@ -1,10 +1,8 @@
-# TODO
-#  - cronjob -- Require: crondaemon? (clamav doesn't depend on it, but should we?)
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.15
+Release:	2.16
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -28,12 +26,10 @@ BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.202
+Requires:	crondaemon
 Requires:	perl-AppConfig >= 1.52
-Requires:	perl-CGI >= 2.752
 Requires:	perl-DBI >= 1.19
-Requires:	perl-Digest-MD5 >= 1.19
 Requires:	perl(Fcntl) >= 1.03
-Requires:	perl-HTML-Template >= 2.5
 Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
 Requires:	rrdtool >= 1.00
@@ -87,6 +83,9 @@ Requires:	apache(mod_access)
 Requires:	apache(mod_alias)
 Requires:	apache(mod_auth)
 Requires:	apache(mod_cgi)
+Requires:	perl-CGI >= 2.752
+Requires:	perl-Digest-MD5 >= 1.19
+Requires:	perl-HTML-Template >= 2.5
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
