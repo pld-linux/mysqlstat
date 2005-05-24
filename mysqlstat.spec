@@ -113,7 +113,7 @@ install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cach
 	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	VARDEST=$RPM_BUILD_ROOT/var/lib/%{name} \
 	LIBSDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
-	HOME=$RPM_BUILD_ROOT%{_datadir}/%{name}
+	HOME=$RPM_BUILD_ROOT%{_datadir}/%{name} \
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
 install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/apache-%{name}.conf
