@@ -105,7 +105,7 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache,/etc/httpd}
 
-%{__make} install \
+%{__make} -j1 install \
 	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
 	ETCDEST=$RPM_BUILD_ROOT%{_sysconfdir} \
 	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
