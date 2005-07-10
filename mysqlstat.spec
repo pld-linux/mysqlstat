@@ -2,7 +2,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.16
+Release:	2.17
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -25,7 +25,7 @@ BuildRequires:	perl-HTML-Template >= 2.5
 BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	rrdtool >= 1.00
-BuildRequires:	rpmbuild(macros) >= 1.202
+BuildRequires:	rpmbuild(macros) >= 1.226
 Requires:	crondaemon
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-DBI >= 1.19
@@ -40,8 +40,6 @@ Provides:	user(mysqlstat)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_sysconfdir	/etc/%{name}
-%define		_apache1dir	/etc/apache
-%define		_apache2dir	/etc/httpd
 
 %description
 MYSQLSTAT - A set of utilities to monitor, store and display MySQL
@@ -136,40 +134,16 @@ if [ "$1" = "0" ]; then
 fi
 
 %triggerin cgi -- apache1 >= 1.3.33-2
-if [ "$1" = "1" ] && [ "$2" = "1" ] && [ -d %{_apache1dir}/conf.d ]; then
-	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache1dir}/conf.d/99_%{name}.conf
-	if [ -f /var/lock/subsys/apache ]; then
-		/etc/rc.d/init.d/apache restart 1>&2
-	fi
-fi
+%apache_config_install -v 1 -c %{_sysconfdir}/apache-%{name}.conf
 
 %triggerun cgi -- apache1 >= 1.3.33-2
-if [ "$1" = "0" ] || [ "$2" = "0" ]; then
-	if [ -L %{_apache1dir}/conf.d/99_%{name}.conf ]; then
-		rm -f %{_apache1dir}/conf.d/99_%{name}.conf
-		if [ -f /var/lock/subsys/apache ]; then
-			/etc/rc.d/init.d/apache restart 1>&2
-		fi
-	fi
-fi
+%apache_config_uninstall -v 1
 
 %triggerin cgi -- apache >= 2.0.0
-if [ "$1" = "1" ] && [ "$2" = "1" ] && [ -d %{_apache2dir}/httpd.conf ]; then
-	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache2dir}/httpd.conf/99_%{name}.conf
-	if [ -f /var/lock/subsys/httpd ]; then
-		/etc/rc.d/init.d/httpd restart 1>&2
-	fi
-fi
+%apache_config_install -v 2 -c %{_sysconfdir}/apache-%{name}.conf
 
 %triggerun cgi -- apache >= 2.0.0
-if [ "$1" = "0" ] || [ "$2" = "0" ]; then
-	if [ -L %{_apache2dir}/httpd.conf/99_%{name}.conf ]; then
-		rm -f %{_apache2dir}/httpd.conf/99_%{name}.conf
-		if [ -f /var/lock/subsys/httpd ]; then
-			/etc/rc.d/init.d/httpd restart 1>&2
-		fi
-	fi
-fi
+%apache_config_uninstall -v 2
 
 # config path changed, trigger it
 %triggerpostun cgi -- %{name}-cgi < 0.0.0.4-2.10
@@ -177,14 +151,14 @@ if [ -f /etc/httpd/mysqlstat.conf.rpmsave ]; then
 	cp -f %{_sysconfdir}/apache-%{name}.conf{,.rpmnew}
 	mv -f /etc/httpd/mysqlstat.conf.rpmsave %{_sysconfdir}/apache-%{name}.conf
 fi
-if [ -d %{_apache2dir}/httpd.conf ]; then
-	ln -sf %{_sysconfdir}/apache-%{name}.conf %{_apache2dir}/httpd.conf/99_%{name}.conf
+if [ -d /etc/httpd/httpd.conf ]; then
+	ln -sf %{_sysconfdir}/apache-%{name}.conf /etc/httpd/httpd.conf/99_%{name}.conf
 	if [ -f /var/lock/subsys/httpd ]; then
-		/etc/rc.d/init.d/httpd restart 1>&2
+		/etc/rc.d/init.d/httpd reload 1>&2
 	fi
 fi
 
-%triggerpostun -- %{name}-cgi < 0.0.0.4-2.14
+%triggerpostun -- %{name} < 0.0.0.4-2.14
 echo >&2 "IMPORTANT: Renaming .rrd files to .old as the file format has changed!"
 for a in /var/lib/%{name}/*.rrd; do
 	mv -v $a $a.old
