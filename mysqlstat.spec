@@ -1,8 +1,9 @@
+%include	/usr/lib/rpm/macros.perl
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	2.17
+Release:	2.18
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
