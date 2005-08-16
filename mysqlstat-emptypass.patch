@@ -1,0 +1,11 @@
+--- ./libs/mysqlstat.pm.in~	2005-07-18 16:08:59.000000000 +0300
++++ ./libs/mysqlstat.pm.in	2005-08-16 14:59:25.448320840 +0300
+@@ -156,7 +156,7 @@
+ 	foreach(keys %{ $config->{servers} }){
+ 		my $s = $config->{servers}->{$_};
+ 
+-		if (!exists($s->{host}) || !exists($s->{name}) || !exists($s->{user}) || !exists($s->{password})){
++		if (!exists($s->{host}) || !exists($s->{name}) || !exists($s->{user})) {
+ 			printError("Not completed definition for [$_]\n");
+ 		}
+ 	}
