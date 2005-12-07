@@ -3,7 +3,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	5
+Release:	5.7
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -17,6 +17,7 @@ Patch1:		%{name}-logo.patch
 Patch2:		%{name}-owner.patch
 Patch3:		%{name}-qcache.patch
 Patch4:		%{name}-emptypass.patch
+Patch5:		%{name}-ndebug.patch
 URL:		http://www.mysqlstat.org/en/
 BuildRequires:	perl-AppConfig >= 1.52
 BuildRequires:	perl-CGI >= 2.752
@@ -34,13 +35,16 @@ Requires:	perl-DBI >= 1.19
 Requires:	perl(Fcntl) >= 1.03
 Requires:	perl-DBD-mysql >= 1.221
 Requires:	perl-Storable >= 2.04
-Requires:	rrdtool >= 1.00
+Requires:	perl-rrdtool >= 1.00
 Requires(pre):	/bin/id
 Requires(pre):	/usr/sbin/useradd
 Requires(postun):	/usr/sbin/userdel
 Provides:	user(mysqlstat)
+BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
+%define		_webapps	/etc/webapps
+%define		_webapp		%{name}
 %define		_sysconfdir	/etc/%{name}
 
 %description
@@ -79,6 +83,7 @@ Summary(pl):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	webserver = apache
+Requires:	webapps
 Requires:	apache(mod_access)
 Requires:	apache(mod_alias)
 Requires:	apache(mod_auth)
@@ -100,31 +105,33 @@ Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 %patch2 -p0
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 %configure2_13
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/lib/%{name}/cache,/etc/httpd}
+install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/{cache,lib}/%{name},%{_webapps}/%{_webapp}}
 
 %{__make} -j1 install \
-	BINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
+	BINDEST=$RPM_BUILD_ROOT%{_prefix}/lib/%{name} \
 	ETCDEST=$RPM_BUILD_ROOT%{_sysconfdir} \
-	CGIBINDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
+	CGIBINDEST=$RPM_BUILD_ROOT%{_prefix}/lib/%{name} \
 	VARDEST=$RPM_BUILD_ROOT/var/lib/%{name} \
-	LIBSDEST=$RPM_BUILD_ROOT%{_libdir}/%{name} \
+	LIBSDEST=$RPM_BUILD_ROOT%{_prefix}/lib/%{name} \
 	HOME=$RPM_BUILD_ROOT%{_datadir}/%{name} \
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
-install %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/apache-%{name}.conf
+install %{SOURCE2} $RPM_BUILD_ROOT%{_webapps}/%{_webapp}/apache.conf
+install %{SOURCE2} $RPM_BUILD_ROOT%{_webapps}/%{_webapp}/httpd.conf
 install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-%useradd -u 138 -d /usr/share/mysqlstat -s /bin/false -g http -c "MySQL Statistics" mysqlstat
+%useradd -u 138 -g http -c "MySQL Statistics" mysqlstat
 
 %postun
 if [ "$1" = "0" ]; then
@@ -133,23 +140,23 @@ fi
 
 %preun cgi
 if [ "$1" = "0" ]; then
-	rm -f /var/lib/%{name}/cache/* 2>/dev/null || :
+	rm -f /var/cache/%{name}/* 2>/dev/null
 fi
 
-%triggerin cgi -- apache1 >= 1.3.33-2
-%apache_config_install -v 1 -c %{_sysconfdir}/apache-%{name}.conf
+%triggerin -- apache1
+%webapp_register apache %{_webapp}
 
-%triggerun cgi -- apache1 >= 1.3.33-2
-%apache_config_uninstall -v 1
+%triggerun -- apache1
+%webapp_unregister apache %{_webapp}
 
-%triggerin cgi -- apache >= 2.0.0
-%apache_config_install -v 2 -c %{_sysconfdir}/apache-%{name}.conf
+%triggerin -- apache >= 2.0.0
+%webapp_register httpd %{_webapp}
 
-%triggerun cgi -- apache >= 2.0.0
-%apache_config_uninstall -v 2
+%triggerun -- apache >= 2.0.0
+%webapp_unregister httpd %{_webapp}
 
+%triggerpostun cgi -- mysqlstat-cgi < 0.0.0.4-2.10
 # config path changed, trigger it
-%triggerpostun cgi -- %{name}-cgi < 0.0.0.4-2.10
 if [ -f /etc/httpd/mysqlstat.conf.rpmsave ]; then
 	cp -f %{_sysconfdir}/apache-%{name}.conf{,.rpmnew}
 	mv -f /etc/httpd/mysqlstat.conf.rpmsave %{_sysconfdir}/apache-%{name}.conf
@@ -167,26 +174,72 @@ for a in /var/lib/%{name}/*.rrd; do
 	mv -v $a $a.old
 done
 
+%triggerpostun cgi -- mysqlstat-cgi < 0.0.0.4-5.1
+# migrate from apache-config macros
+if [ -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave ]; then
+	if [ -d /etc/apache/webapps.d ]; then
+		cp -f %{_sysconfdir}/apache.conf{,.rpmnew}
+		cp -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave %{_sysconfdir}/apache.conf
+	fi
+
+	if [ -d /etc/httpd/webapps.d ]; then
+		cp -f %{_sysconfdir}/httpd.conf{,.rpmnew}
+		cp -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave %{_sysconfdir}/httpd.conf
+	fi
+	rm -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave
+fi
+
+# place new config location, as trigger puts config only on first install, do it here.
+if [ -d /etc/apache/webapps.d ]; then
+	/usr/sbin/webapp register apache %{_webapp}
+	apache_reload=1
+fi
+if [ -d /etc/httpd/webapps.d ]; then
+	/usr/sbin/webapp register httpd %{_webapp}
+	httpd_reload=1
+fi
+
+# register webapp on apaches which were registered earlier
+if [ -L /etc/apache/conf.d/99_mysqlstat.conf ]; then
+	rm -f /etc/apache/conf.d/99_mysqlstat.conf
+	/usr/sbin/webapp register apache %{_webapp}
+	apache_reload=1
+fi
+if [ -L /etc/httpd/httpd.conf/99_mysqlstat.conf ]; then
+	rm -f /etc/httpd/httpd.conf/99_mysqlstat.conf
+	/usr/sbin/webapp register httpd %{_webapp}
+	httpd_reload=1
+fi
+
+if [ "$httpd_reload" ]; then
+	if [ -f /var/lock/subsys/httpd ]; then
+		/etc/rc.d/init.d/httpd reload 1>&2
+	fi
+fi
+if [ "$apache_reload" ]; then
+	if [ -f /var/lock/subsys/apache ]; then
+		/etc/rc.d/init.d/apache reload 1>&2
+	fi
+fi
+
 %files
 %defattr(644,root,root,755)
-%doc FAQ.RUS README.RUS TODO.RUS
-
-%attr(700,mysqlstat,root) %dir %{_sysconfdir}
+%doc %lang(ru) FAQ.RUS README.RUS TODO.RUS
+%doc bin/print_data
+%dir %attr(700,mysqlstat,root) %{_sysconfdir}
 %attr(600,mysqlstat,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/%{name}.conf
-
-%dir %attr(750,mysqlstat,http) /var/lib/%{name}
-
-%dir %{_libdir}/%{name}
-%{_libdir}/%{name}/mysqlstat.pm
-%attr(755,root,root) %{_libdir}/%{name}/collector
-%attr(755,root,root) %{_libdir}/%{name}/print_data
-
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/cron.d/%{name}
+%dir %{_prefix}/lib/%{name}
+%{_prefix}/lib/%{name}/mysqlstat.pm
+%attr(755,root,root) %{_prefix}/lib/%{name}/collector
+%dir %attr(750,mysqlstat,http) /var/lib/%{name}
 
 %files cgi
 %defattr(644,root,root,755)
-%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/apache-%{name}.conf
+%dir %attr(750,root,http) %{_webapps}/%{_webapp}
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_webapps}/%{_webapp}/apache.conf
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_webapps}/%{_webapp}/httpd.conf
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
-%attr(755,root,root) %{_libdir}/%{name}/mysqlstat.cgi
-%dir %attr(750,http,http) /var/lib/%{name}/cache
+%attr(755,root,root) %{_prefix}/lib/%{name}/mysqlstat.cgi
+%dir %attr(750,http,http) /var/cache/%{name}
