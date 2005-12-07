@@ -1,0 +1,10 @@
+--- ./Makefile.in~	2005-12-07 02:30:33.000000000 +0200
++++ ./Makefile.in	2005-12-07 02:33:57.000000000 +0200
+@@ -54,7 +54,6 @@
+ 
+ install-bin:
+ 	./install-sh -c -m 550 bin/collector $(BINDEST)/collector
+-	./install-sh -c -m 550 bin/print_data $(BINDEST)/print_data
+ 
+ install-conf:	
+ 	[ -f $(ETCDEST)/mysqlstat.conf ] || ./install-sh -c -m 600 etc/mysqlstat.conf $(ETCDEST)/mysqlstat.conf
