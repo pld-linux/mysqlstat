@@ -28,7 +28,7 @@ BuildRequires:	perl-HTML-Template >= 2.5
 BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	perl-rrdtool >= 1.00
-BuildRequires:	rpmbuild(macros) >= 1.226
+BuildRequires:	rpmbuild(macros) >= 1.264
 Requires:	crondaemon
 Requires:	perl-AppConfig >= 1.52
 Requires:	perl-DBI >= 1.19
