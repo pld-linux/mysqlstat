@@ -3,7 +3,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	6
+Release:	7
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -19,26 +19,26 @@ Patch3:		%{name}-qcache.patch
 Patch4:		%{name}-emptypass.patch
 Patch5:		%{name}-ndebug.patch
 URL:		http://www.mysqlstat.org/en/
+BuildRequires:	perl(Fcntl) >= 1.03
 BuildRequires:	perl-AppConfig >= 1.52
 BuildRequires:	perl-CGI >= 2.752
+BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-DBI >= 1.19
 BuildRequires:	perl-Digest-MD5 >= 1.19
-BuildRequires:	perl(Fcntl) >= 1.03
 BuildRequires:	perl-HTML-Template >= 2.5
-BuildRequires:	perl-DBD-mysql >= 1.221
 BuildRequires:	perl-Storable >= 2.04
 BuildRequires:	perl-rrdtool >= 1.00
 BuildRequires:	rpmbuild(macros) >= 1.264
-Requires:	crondaemon
-Requires:	perl-AppConfig >= 1.52
-Requires:	perl-DBI >= 1.19
-Requires:	perl(Fcntl) >= 1.03
-Requires:	perl-DBD-mysql >= 1.221
-Requires:	perl-Storable >= 2.04
-Requires:	perl-rrdtool >= 1.00
+Requires(postun):	/usr/sbin/userdel
 Requires(pre):	/bin/id
 Requires(pre):	/usr/sbin/useradd
-Requires(postun):	/usr/sbin/userdel
+Requires:	crondaemon
+Requires:	perl(Fcntl) >= 1.03
+Requires:	perl-AppConfig >= 1.52
+Requires:	perl-DBD-mysql >= 1.221
+Requires:	perl-DBI >= 1.19
+Requires:	perl-Storable >= 2.04
+Requires:	perl-rrdtool >= 1.00
 Provides:	user(mysqlstat)
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -82,8 +82,6 @@ Summary:	MYSQLSTAT - CGI script
 Summary(pl):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
-Requires:	webserver = apache
-Requires:	webapps
 Requires:	apache(mod_access)
 Requires:	apache(mod_alias)
 Requires:	apache(mod_auth)
@@ -91,6 +89,8 @@ Requires:	apache(mod_cgi)
 Requires:	perl-CGI >= 2.752
 Requires:	perl-Digest-MD5 >= 1.19
 Requires:	perl-HTML-Template >= 2.5
+Requires:	webapps
+Requires:	webserver = apache
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
@@ -212,14 +212,10 @@ if [ -L /etc/httpd/httpd.conf/99_mysqlstat.conf ]; then
 fi
 
 if [ "$httpd_reload" ]; then
-	if [ -f /var/lock/subsys/httpd ]; then
-		/etc/rc.d/init.d/httpd reload 1>&2
-	fi
+	%service -q httpd reload
 fi
 if [ "$apache_reload" ]; then
-	if [ -f /var/lock/subsys/apache ]; then
-		/etc/rc.d/init.d/apache reload 1>&2
-	fi
+	%service -q apache reload
 fi
 
 %files
