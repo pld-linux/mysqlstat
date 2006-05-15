@@ -3,7 +3,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	7
+Release:	8
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -143,16 +143,16 @@ if [ "$1" = "0" ]; then
 	rm -f /var/cache/%{name}/* 2>/dev/null
 fi
 
-%triggerin -- apache1
+%triggerin cgi -- apache1
 %webapp_register apache %{_webapp}
 
-%triggerun -- apache1
+%triggerun cgi -- apache1
 %webapp_unregister apache %{_webapp}
 
-%triggerin -- apache < 2.2.0, apache-base
+%triggerin cgi -- apache < 2.2.0, apache-base
 %webapp_register httpd %{_webapp}
 
-%triggerun -- apache < 2.2.0, apache-base
+%triggerun cgi -- apache < 2.2.0, apache-base
 %webapp_unregister httpd %{_webapp}
 
 %triggerpostun cgi -- mysqlstat-cgi < 0.0.0.4-2.10
