@@ -155,69 +155,6 @@ fi
 %triggerun cgi -- apache < 2.2.0, apache-base
 %webapp_unregister httpd %{_webapp}
 
-%triggerpostun cgi -- mysqlstat-cgi < 0.0.0.4-2.10
-# config path changed, trigger it
-if [ -f /etc/httpd/mysqlstat.conf.rpmsave ]; then
-	cp -f %{_sysconfdir}/apache-%{name}.conf{,.rpmnew}
-	mv -f /etc/httpd/mysqlstat.conf.rpmsave %{_sysconfdir}/apache-%{name}.conf
-fi
-if [ -d /etc/httpd/httpd.conf ]; then
-	ln -sf %{_sysconfdir}/apache-%{name}.conf /etc/httpd/httpd.conf/99_%{name}.conf
-	if [ -f /var/lock/subsys/httpd ]; then
-		/etc/rc.d/init.d/httpd reload 1>&2
-	fi
-fi
-
-%triggerpostun -- %{name} < 0.0.0.4-2.14
-echo >&2 "IMPORTANT: Renaming .rrd files to .old as the file format has changed!"
-for a in /var/lib/%{name}/*.rrd; do
-	mv -v $a $a.old
-done
-
-%triggerpostun cgi -- mysqlstat-cgi < 0.0.0.4-5.1
-# migrate from apache-config macros
-if [ -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave ]; then
-	if [ -d /etc/apache/webapps.d ]; then
-		cp -f %{_sysconfdir}/apache.conf{,.rpmnew}
-		cp -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave %{_sysconfdir}/apache.conf
-	fi
-
-	if [ -d /etc/httpd/webapps.d ]; then
-		cp -f %{_sysconfdir}/httpd.conf{,.rpmnew}
-		cp -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave %{_sysconfdir}/httpd.conf
-	fi
-	rm -f /etc/mysqlstat/apache-mysqlstat.conf.rpmsave
-fi
-
-# place new config location, as trigger puts config only on first install, do it here.
-if [ -d /etc/apache/webapps.d ]; then
-	/usr/sbin/webapp register apache %{_webapp}
-	apache_reload=1
-fi
-if [ -d /etc/httpd/webapps.d ]; then
-	/usr/sbin/webapp register httpd %{_webapp}
-	httpd_reload=1
-fi
-
-# register webapp on apaches which were registered earlier
-if [ -L /etc/apache/conf.d/99_mysqlstat.conf ]; then
-	rm -f /etc/apache/conf.d/99_mysqlstat.conf
-	/usr/sbin/webapp register apache %{_webapp}
-	apache_reload=1
-fi
-if [ -L /etc/httpd/httpd.conf/99_mysqlstat.conf ]; then
-	rm -f /etc/httpd/httpd.conf/99_mysqlstat.conf
-	/usr/sbin/webapp register httpd %{_webapp}
-	httpd_reload=1
-fi
-
-if [ "$httpd_reload" ]; then
-	%service -q httpd reload
-fi
-if [ "$apache_reload" ]; then
-	%service -q apache reload
-fi
-
 %files
 %defattr(644,root,root,755)
 %doc %lang(ru) FAQ.RUS README.RUS TODO.RUS
