@@ -3,7 +3,7 @@ Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage st
 Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
-Release:	10
+Release:	10.6
 Epoch:		0
 License:	GPL
 Group:		Applications/Databases
@@ -11,7 +11,8 @@ Source0:	http://www.mysqlstat.org/dist/%{name}-%{version}-beta.tar.gz
 # Source0-md5:	234035de66c91675362487e55446ed5b
 Source1:	%{name}.cron
 Source2:	%{name}-apache.conf
-Source3:	%{name}.conf
+Source3:	%{name}-lighttpd.conf
+Source4:	%{name}.conf
 Patch0:		%{name}-paths.patch
 Patch1:		%{name}-logo.patch
 Patch2:		%{name}-owner.patch
@@ -82,15 +83,15 @@ Summary:	MYSQLSTAT - CGI script
 Summary(pl):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
-Requires:	apache(mod_access)
-Requires:	apache(mod_alias)
-Requires:	apache(mod_auth)
-Requires:	apache(mod_cgi)
 Requires:	perl-CGI >= 2.752
 Requires:	perl-Digest-MD5 >= 1.19
 Requires:	perl-HTML-Template >= 2.5
 Requires:	webapps
-Requires:	webserver = apache
+Requires:	webserver
+Requires:	webserver(access)
+Requires:	webserver(alias)
+Requires:	webserver(auth)
+Requires:	webserver(cgi)
 
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
@@ -125,7 +126,8 @@ install -d $RPM_BUILD_ROOT{/etc/cron.d,%{_datadir}/%{name},/var/{cache,lib}/%{na
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.d/%{name}
 install %{SOURCE2} $RPM_BUILD_ROOT%{_webapps}/%{_webapp}/apache.conf
 install %{SOURCE2} $RPM_BUILD_ROOT%{_webapps}/%{_webapp}/httpd.conf
-install %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
+install %{SOURCE3} $RPM_BUILD_ROOT%{_webapps}/%{_webapp}/lighttpd.conf
+install %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -155,6 +157,12 @@ fi
 %triggerun cgi -- apache < 2.2.0, apache-base
 %webapp_unregister httpd %{_webapp}
 
+%triggerin cgi -- lighttpd
+%webapp_register lighttpd %{_webapp}
+
+%triggerun cgi -- lighttpd
+%webapp_unregister lighttpd %{_webapp}
+
 %files
 %defattr(644,root,root,755)
 %doc %lang(ru) FAQ.RUS README.RUS TODO.RUS
@@ -172,6 +180,7 @@ fi
 %dir %attr(750,root,http) %{_webapps}/%{_webapp}
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_webapps}/%{_webapp}/apache.conf
 %attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_webapps}/%{_webapp}/httpd.conf
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_webapps}/%{_webapp}/lighttpd.conf
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/*
 %attr(755,root,root) %{_prefix}/lib/%{name}/mysqlstat.cgi
