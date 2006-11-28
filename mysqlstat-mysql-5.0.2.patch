@@ -1,0 +1,11 @@
+--- mysqlstat/libs/mysqlstat.pm.in~	2006-11-28 17:03:52.000000000 +0200
++++ mysqlstat/libs/mysqlstat.pm.in	2006-11-28 17:33:32.126871336 +0200
+@@ -454,7 +454,7 @@
+ 		return undef;
+   }
+ 
+-  my $q = $dbh->prepare('SHOW STATUS');
++  my $q = $dbh->prepare('SHOW /*!50002 GLOBAL */ STATUS;');
+ 
+   $q->execute() or return undef;
+ 
