@@ -1,6 +1,6 @@
 %include	/usr/lib/rpm/macros.perl
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
-Summary(pl):	MYSQLSTAT - narzêdzia do monitorowania, zapisywania i wy¶wietlania statystyk MySQL
+Summary(pl.UTF-8):   MYSQLSTAT - narzÄ™dzia do monitorowania, zapisywania i wyÅ›wietlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
 Release:	10.7
@@ -64,24 +64,24 @@ Types of stats:
 - Types of queries
 - Temporary and disk tables usage
 
-%description -l pl
-MYSQLSTAT - zestaw narzêdzi do monitorowania, zapisywania i
-wy¶wietlania statystyk systemu baz danych MySQL.
+%description -l pl.UTF-8
+MYSQLSTAT - zestaw narzÄ™dzi do monitorowania, zapisywania i
+wyÅ›wietlania statystyk systemu baz danych MySQL.
 
 Rodzaje statystyk:
-- Liczba zapytañ (zapytania/sekundê)
-- Liczba po³±czeñ (po³±czenia/sekundê)
-- Wej¶cie/wyj¶cie danych (bajty/sekundê)
-- ¯±dania zapisu klucza (¿±dania/sekundê)
-- ¯±dania odczytu klucza (¿±dania/sekundê)
-- Zapisy klucza (zapisy/sekundê)
-- Odczyty klucza (odczyty/sekundê)
-- Rodzaje zapytañ
+- Liczba zapytaÅ„ (zapytania/sekundÄ™)
+- Liczba poÅ‚Ä…czeÅ„ (poÅ‚Ä…czenia/sekundÄ™)
+- WejÅ›cie/wyjÅ›cie danych (bajty/sekundÄ™)
+- Å»Ä…dania zapisu klucza (Å¼Ä…dania/sekundÄ™)
+- Å»Ä…dania odczytu klucza (Å¼Ä…dania/sekundÄ™)
+- Zapisy klucza (zapisy/sekundÄ™)
+- Odczyty klucza (odczyty/sekundÄ™)
+- Rodzaje zapytaÅ„
 - Wykorzystanie tabel tymczasowych i na dysku
 
 %package cgi
 Summary:	MYSQLSTAT - CGI script
-Summary(pl):	MYSQLSTAT - skrypt CGI
+Summary(pl.UTF-8):   MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	perl-CGI >= 2.752
@@ -97,7 +97,7 @@ Requires:	webserver(cgi)
 %description cgi
 This package contains the cgi-script for MYSQLSTAT.
 
-%description cgi -l pl
+%description cgi -l pl.UTF-8
 Ten pakiet zawiera skrypt CGI dla programu MYSQLSTAT.
 
 %prep
