@@ -1,6 +1,6 @@
 %include	/usr/lib/rpm/macros.perl
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
-Summary(pl.UTF-8):   MYSQLSTAT - narzędzia do monitorowania, zapisywania i wyświetlania statystyk MySQL
+Summary(pl.UTF-8):	MYSQLSTAT - narzędzia do monitorowania, zapisywania i wyświetlania statystyk MySQL
 Name:		mysqlstat
 Version:	0.0.0.4
 Release:	10.7
@@ -81,7 +81,7 @@ Rodzaje statystyk:
 
 %package cgi
 Summary:	MYSQLSTAT - CGI script
-Summary(pl.UTF-8):   MYSQLSTAT - skrypt CGI
+Summary(pl.UTF-8):	MYSQLSTAT - skrypt CGI
 Group:		Applications/WWW
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	perl-CGI >= 2.752
