@@ -32,7 +32,7 @@ diff -u ./print_data /tmp/print_data
  
  use constant SKIN_BASE_DIR	 => HOME_DIR.'/skins';
 -use constant CACHE_DIR 		 => '/tmp';
-+use constant CACHE_DIR 		 => '/var/lib/mysqlstat/cache';
++use constant CACHE_DIR 		 => '/var/cache/mysqlstat';
  ###############################################################################
  # CONFIG END
  ###############################################################################
