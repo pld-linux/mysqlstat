@@ -1,4 +1,3 @@
-%include	/usr/lib/rpm/macros.perl
 Summary:	MYSQLSTAT - utilities to monitor, store and display MySQL DBMS usage statistics
 Summary(pl.UTF-8):	MYSQLSTAT - narzędzia do monitorowania, zapisywania i wyświetlania statystyk MySQL
 Name:		mysqlstat
